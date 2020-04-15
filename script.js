@@ -1,9 +1,19 @@
 const fs = require('fs');
 
-const test = () => {
+const doIt = () => {
     const serverLogData = getFileData("server.log");
 
-    createFile("scanning-result.json", "some random data");
+    scan(serverLogData)
+
+    // createFile("scanning-result.json", "some random data");
+};
+
+const scan = (data) => {
+    const arrayData = data.split('\n');
+
+    arrayData.map(lineData => {
+        // console.log(lineData);
+    })
 };
 
 const getFileData = (fileName) => {
@@ -23,4 +33,4 @@ const createFile = (name, data) => {
     }
 };
 
-test();
+doIt();
