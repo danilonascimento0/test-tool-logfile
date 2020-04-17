@@ -21,8 +21,7 @@ const scan = (data) => {
 
         // When start startRendering - "Executing request startRendering"
         if (lineData.includes("Executing request startRendering")) {
-            let lineDataArray = lineData.split(" ");
-            let lineDataObject = createDataObject(lineDataArray);
+            let lineDataObject = createDataObject(lineData);
 
             console.log(lineDataObject)
         }
@@ -34,15 +33,16 @@ const scan = (data) => {
     }
 };
 
-createDataObject = (data) => {
+createDataObject = (lineData) => {
+    let lineDataArray = lineData.split(" ");
     return {
-        datetime: data[0].concat(" "+data[1]),
-        thread: data[2],
+        datetime: lineDataArray[0].concat(" "+lineDataArray[1]),
+        thread: lineDataArray[2],
         // level: array[3],
         // class: array[5],
         // message: lineDataArray.slice(6).join(" ")
-        document: data[11].match(/\d+/)[0], // Will find the number inside that position
-        page: data[12].match(/\d+/)[0] // Will find for number inside that position
+        document: lineDataArray[11].match(/\d+/)[0], // Will find the number inside that position
+        page: lineDataArray[12].match(/\d+/)[0] // Will find for number inside that position
     }
 };
 
