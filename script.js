@@ -22,8 +22,7 @@ const scan = (data) => {
         // When start startRendering - "Executing request startRendering"
         if (lineData.includes("Executing request startRendering")) {
             let lineDataObject = createDataObject(lineData);
-
-            console.log(lineDataObject)
+            lineDataObject.uid = scanForReturnedUID(arrayData, lineDataObject.thread, x);
         }
         // SAME THREAD
         // Return of startRendering - "Service startRendering returned ..."
@@ -31,6 +30,20 @@ const scan = (data) => {
         // Check if it will be necessary
         //if (!lineData.includes("   at")) { }
     }
+};
+
+scanForReturnedUID = (arrayData, thread, pos) => {
+    for (let x = 0; x < arrayData.length; x++) {
+        pos++;
+
+        let lineData = arrayData[pos];
+        let lineDataArray = lineData.split(" ");
+        if (lineData.includes("Service startRendering returned") && thread===lineDataArray[2]) {
+            return lineDataArray[9]; // Returning the UID
+        }
+    }
+
+    return "UID not found";
 };
 
 createDataObject = (lineData) => {
