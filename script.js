@@ -1,52 +1,44 @@
 const fs = require('fs');
+const util = require('util');
+const lineReader = require('line-reader');
+
+var lineByLine = util.promisify(lineReader.eachLine);
+var report = {
+    rendering: [],
+    summary: []
+};
 
 const doIt = () => {
-    const serverLogData = getFileData("server.log");
-
-    scan(serverLogData);
-
-    // createFile("scanning-result.json", "some random data");
+    scanFileByLine("server.log")
+        .then(() => createFile("scanning-result.json", report));
 };
 
-const scan = (data) => {
-    const arrayData = data.split('\n');
-
-    let report = {
-        rendering: [],
-        summary: []
-    };
-
-    for (let x = 0; x < arrayData.length; x++) {
-        let lineData = arrayData[x];
-
-        // When start startRendering - "Executing request startRendering"
-        if (lineData.includes("Executing request startRendering")) {
-            let lineDataObject = createDataObject(lineData);
-            lineDataObject.uid = scanForReturnedUID(arrayData, lineDataObject.thread, x);
-        }
-        // SAME THREAD
-        // Return of startRendering - "Service startRendering returned ..."
-
-        // Check if it will be necessary
-        //if (!lineData.includes("   at")) { }
-    }
+const scanFileByLine = async (fileName) => {
+    return lineByLine(fileName, (line) => {
+        findData(line);
+    });
 };
 
-scanForReturnedUID = (arrayData, thread, pos) => {
-    for (let x = 0; x < arrayData.length; x++) {
-        pos++;
-
-        let lineData = arrayData[pos];
-        let lineDataArray = lineData.split(" ");
-        if (lineData.includes("Service startRendering returned") && thread===lineDataArray[2]) {
-            return lineDataArray[9]; // Returning the UID
-        }
+const findData = (line) => {
+    if (line.includes("Executing request startRendering")) {
+        let dataObject = createDataObject(line);
+        report.rendering[dataObject.thread] = createDataObject(line); // Creates a new line on report
+    } else if (line.includes("Service startRendering returned")) {
+        scanForReturnedUID(line);
     }
 
-    return "UID not found";
+    return report;
 };
 
-createDataObject = (lineData) => {
+const scanForReturnedUID = (line) => {
+    let lineDataArray = line.split(" ");
+    let thread = lineDataArray[2];
+    let dataObject = report.rendering[thread];
+    if (dataObject)
+        dataObject.uid = lineDataArray[9];
+};
+
+const createDataObject = (lineData) => {
     let lineDataArray = lineData.split(" ");
     return {
         datetime: lineDataArray[0].concat(" "+lineDataArray[1]),
@@ -59,21 +51,8 @@ createDataObject = (lineData) => {
     }
 };
 
-const getFileData = (fileName) => {
-    try {
-        return fs.readFileSync(fileName, "utf-8");
-    } catch (err) {
-        console.error(err);
-    }
-};
-
-const createFile = (name, data) => {
-    try {
-        fs.writeFileSync(name, data);
-        console.log(name + " file has been saved.");
-    } catch (error) {
-        console.error(err);
-    }
+const createFile = async (name, data) => {
+    fs.writeFile(name, data, () => console.log(name + " file has been saved."));
 };
 
 doIt();
