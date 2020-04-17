@@ -18,6 +18,18 @@ const scan = (data) => {
 
     arrayData.map(lineData => {
         // When start startRendering - "Executing request startRendering"
+        if (lineData.includes("Executing request startRendering")) {
+            let lineDataArray = lineData.split(" ");
+            let lineDataObject = {
+                date: lineDataArray[0], time: lineDataArray[1],
+                thread: lineDataArray[2],
+                // level: array[3],
+                // class: array[5],
+                // message: lineDataArray.slice(6).join(" ")
+                document: lineDataArray[11].match(/\d+/)[0], // Will find the number inside that position
+                page: lineDataArray[12].match(/\d+/)[0] // Will find for number inside that position
+            };
+        }
         // SAME THREAD
         // Return of startRendering - "Service startRendering returned ..."
 
