@@ -16,26 +16,34 @@ const scan = (data) => {
         summary: []
     };
 
-    arrayData.map(lineData => {
+    for (let x = 0; x < arrayData.length; x++) {
+        let lineData = arrayData[x];
+
         // When start startRendering - "Executing request startRendering"
         if (lineData.includes("Executing request startRendering")) {
             let lineDataArray = lineData.split(" ");
-            let lineDataObject = {
-                date: lineDataArray[0], time: lineDataArray[1],
-                thread: lineDataArray[2],
-                // level: array[3],
-                // class: array[5],
-                // message: lineDataArray.slice(6).join(" ")
-                document: lineDataArray[11].match(/\d+/)[0], // Will find the number inside that position
-                page: lineDataArray[12].match(/\d+/)[0] // Will find for number inside that position
-            };
+            let lineDataObject = createDataObject(lineDataArray);
+
+            console.log(lineDataObject)
         }
         // SAME THREAD
         // Return of startRendering - "Service startRendering returned ..."
 
         // Check if it will be necessary
         //if (!lineData.includes("   at")) { }
-    });
+    }
+};
+
+createDataObject = (data) => {
+    return {
+        datetime: data[0].concat(" "+data[1]),
+        thread: data[2],
+        // level: array[3],
+        // class: array[5],
+        // message: lineDataArray.slice(6).join(" ")
+        document: data[11].match(/\d+/)[0], // Will find the number inside that position
+        page: data[12].match(/\d+/)[0] // Will find for number inside that position
+    }
 };
 
 const getFileData = (fileName) => {
