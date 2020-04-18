@@ -1,4 +1,5 @@
 import { findData } from './dataController.js';
+import { resultReportJSON } from "../model/report";
 
 const fs = require('fs');
 const util = require('util');
@@ -11,6 +12,6 @@ export const scanFileByLine = async (fileName) => {
     });
 };
 
-export const createFile = async (name, data) => {
-    fs.writeFile(name, data, () => console.log(name + " file has been saved."));
+export const createFile = async (name) => {
+    fs.writeFile(name, resultReportJSON(), () => console.log(name + " file has been saved."));
 };
