@@ -1,36 +1,18 @@
-const fs = require('fs');
-const util = require('util');
-const lineReader = require('line-reader');
+import { report } from '../model/report.js';
 
-var lineByLine = util.promisify(lineReader.eachLine);
-var report = {
-    rendering: [],
-    summary: []
-};
-
-const doIt = () => {
-    scanFileByLine("server.log")
-        .then(() => createFile("scanning-result.json", report));
-};
-
-const scanFileByLine = async (fileName) => {
-    return lineByLine(fileName, (line) => {
-        findData(line);
-    });
-};
-
-const findData = (line) => {
+export const findData = (line) => {
     if (line.includes("Executing request startRendering")) {
         let dataObject = createDataObject(line);
-        report.rendering[dataObject.thread] = createDataObject(line); // Creates a new line on report
+        // Creates a new line on report using the thread as key
+        report.rendering[dataObject.thread] = createDataObject(line);
     } else if (line.includes("Service startRendering returned")) {
-        scanForReturnedUID(line);
+        setReturnedUID(line);
     }
 
     return report;
 };
 
-const scanForReturnedUID = (line) => {
+const setReturnedUID = (line) => {
     let lineDataArray = line.split(" ");
     let thread = lineDataArray[2];
     let dataObject = report.rendering[thread];
@@ -50,9 +32,3 @@ const createDataObject = (lineData) => {
         page: lineDataArray[12].match(/\d+/)[0] // Will find for number inside that position
     }
 };
-
-const createFile = async (name, data) => {
-    fs.writeFile(name, data, () => console.log(name + " file has been saved."));
-};
-
-doIt();
