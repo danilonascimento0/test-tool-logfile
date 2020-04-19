@@ -13,5 +13,5 @@ export const scanFileByLine = async (fileName) => {
 };
 
 export const createFile = async (name) => {
-    fs.writeFile(name, resultReportJSON(), () => console.log(name + " file has been saved."));
+    fs.writeFile(name, resultReportJSON(), () => console.log(`${name}  file has been saved.`));
 };
