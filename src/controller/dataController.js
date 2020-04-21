@@ -9,9 +9,9 @@ export const findData = (line) => {
         addRequest(lineDataArray);
     } else if (line.includes("Service startRendering returned")) {
         setReturnedUID(lineDataArray, arrayByThread);
+    } else if (line.includes("type=request, name=getRendering")) {
+        addGetRequest(lineDataArray);
     }
-
-    return report;
 };
 
 const addRequest = (lineDataArray) => {
@@ -38,12 +38,24 @@ const setReturnedUID = (lineDataArray, arrayByThread) => {
     }
 };
 
+const addGetRequest = (lineDataArray) => {
+    // Looks like the uid is changing for the same request
+    // I'm not sure if it should happen and how I should proceed
+    // However, I am saving the gets as they appear, so we can have something to work with
+    lineDataArray[9] = lineDataArray[9].replace("{arguments=[", "").replace("],", "");
+    let object = Object.values(report.rendering).find(el => el.uid === lineDataArray[9]);
+    if (object) {
+        object.get = object.get.concat(lineDataArray[0].concat(" "+lineDataArray[1]));
+    }
+};
+
 const createDataObject = (lineDataArray, callback) => {
     callback(
         {
             document: lineDataArray[11].match(/\d+/)[0], // Will find the number inside that position
             page: lineDataArray[12].match(/\d+/)[0], // Will find for number inside that position
-            start: [ lineDataArray[0].concat(" "+lineDataArray[1]) ]
+            start: [ lineDataArray[0].concat(" "+lineDataArray[1]) ],
+            get: [ ]
             // thread: lineDataArray[2],
             // level: array[3],
             // class: array[5],
