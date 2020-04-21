@@ -20,8 +20,10 @@ const addRequest = (lineDataArray) => {
         documentPosition(dataObject, (position) => {
             if (!report.rendering[position]) {
                 report.rendering[position] = dataObject;
+                report.summary.unnecessary++; // Counting how many calls were done then we subtract
             } else {
                 report.rendering[position].start = report.rendering[position].start.concat(dataObject.start);
+                report.summary.duplicates++; // If is the second call, this already is a duplicate
             }
         });
         arrayByThread[lineDataArray[2]] = dataObject;
@@ -46,11 +48,14 @@ const addGetRequest = (lineDataArray) => {
     let object = Object.values(report.rendering).find(el => el.uid === lineDataArray[9]);
     if (object) {
         object.get = object.get.concat(lineDataArray[0].concat(" "+lineDataArray[1]));
+
+        // If this is the first get, means we have less one unnecessary call
+        if (object.get.length === 1) report.summary.unnecessary--;
     }
 };
 
 const createDataObject = (lineDataArray, callback) => {
-    callback(
+    callback (
         {
             document: lineDataArray[11].match(/\d+/)[0], // Will find the number inside that position
             page: lineDataArray[12].match(/\d+/)[0], // Will find for number inside that position
