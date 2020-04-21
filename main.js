@@ -3,8 +3,8 @@ import { report } from './src/model/report.js';
 
 const start = () => {
     scanFileByLine("server.log")
-        // .then(() => console.log(report))
-        .then(() => createFile("scanning-result.json", report));
+        .then(() => createFile("scanning-result.json", report))
+        .catch(function(e) { console.log(e); });
 };
 
 start();
